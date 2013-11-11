@@ -6,7 +6,7 @@ module MobileFu
 
   class Railtie < Rails::Railtie
     initializer "mobile-fu.configure" do |app|
-      app.config.middleware.use Rack::MobileDetect
+      app.config.middleware.use Rack::MobileDetect if Rails.env == 'development'
     end
 
     if Rails::VERSION::MAJOR >= 3
@@ -161,10 +161,22 @@ module ActionController
       end
 
       def is_mobile_device?
-        !is_tablet_device? && !!mobile_device
+        !is_tablet_device? && has_mobile_header?
+      end
+
+      # In development we use the MobileDetect rack. Everywhere else we
+      # delegate the headers to nginx
+      def has_mobile_header?
+        if Rails.env == 'development'
+          request.headers['X_MOBILE_DEVICE'].present?
+        else
+          return false unless request.headers['HTTP_X_MOBILE'].present?
+          request.headers['HTTP_X_MOBILE'] == 'true' ? true : false
+        end
       end
 
       def mobile_device
+        return '' unless Rails.env == 'development'
         request.headers['X_MOBILE_DEVICE']
       end
 
