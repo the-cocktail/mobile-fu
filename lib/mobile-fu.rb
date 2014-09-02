@@ -161,7 +161,9 @@ module ActionController
       end
 
       def is_mobile_device?
-        !is_tablet_device? && has_mobile_header?
+        # obviamos tablets en detección de móviles
+        # !is_tablet_device? && has_mobile_header?
+        has_mobile_header?
       end
 
       # In development we use the MobileDetect rack. Everywhere else we
